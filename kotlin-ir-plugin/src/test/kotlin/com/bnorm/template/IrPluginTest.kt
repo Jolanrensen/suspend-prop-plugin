@@ -18,22 +18,41 @@ package com.bnorm.template
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import kotlin.test.assertEquals
+import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
 import org.junit.Test
+import kotlin.test.assertEquals
+
+const val `$` = '$'
 
 class IrPluginTest {
+
   @Test
   fun `IR plugin success`() {
+
+    @Language("kotlin")
+    val contents = """
+        annotation class SuspendProp
+        
+        fun main() {
+            val test1 = "abc"
+            println("Hello $`$`test1")
+            println(test)
+        }
+
+        @SuspendProp
+        var test: Int
+            get() = 4
+            set(value) {
+                println(value)
+            }
+        
+    """.trimIndent()
+
     val result = compile(
       sourceFile = SourceFile.kotlin(
-        "main.kt", """
-fun main() {
-  println(debug())
-}
-
-fun debug() = "Hello, World!"
-"""
+        name = "main.kt",
+        contents = contents,
       )
     )
     assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
